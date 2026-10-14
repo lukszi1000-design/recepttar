@@ -16,7 +16,29 @@
 <p class="hint">A kalóriaösszeg csak a dokumentumban megadott értékekből számol. A hiányzó kalóriaértékű receptek nem számítanak bele.</p>
 </section>
 <section id="shoppingView" class="view hidden"><div class="section-head"><div><h2>Bevásárlólista</h2><p>Válaszd ki, mely napok menüjéből készüljön.</p></div><button id="makeList" class="button primary">Lista összeállítása</button></div><div id="shoppingDays" class="day-checks"></div><div id="shoppingResult"></div></section>
-<section id="allView" class="view hidden"><div class="section-head"><div><h2>Receptek</h2><p>Keresés a két feltöltött hét receptjei között.</p></div></div><input id="searchBox" class="search" placeholder="Recept keresése…" aria-label="Recept keresése"><div id="recipeList" class="recipe-list"></div></section>
+<section id="allView" class="view hidden">
+  <div class="section-head">
+    <div>
+      <h2>Receptek</h2>
+      <p>Keresés a két feltöltött hét receptjei között.</p>
+    </div>
+  </div>
+
+  <label for="mealFilter">Milyen ételt keresel?</label>
+  <select id="mealFilter" class="search">
+    <option value="all">Összes étkezés</option>
+    <option value="breakfast">Reggeli</option>
+    <option value="lunch">Ebéd</option>
+    <option value="snack">Kisétkezés</option>
+    <option value="dinner">Vacsora</option>
+  </select>
+
+  <input id="searchBox" class="search"
+    placeholder="Recept keresése…"
+    aria-label="Recept keresése">
+
+  <div id="recipeList" class="recipe-list"></div>
+</section>
 </main>
 <dialog id="recipeDialog"><div class="dialog-head"><div><p id="dialogMeta" class="eyebrow"></p><h2 id="dialogTitle"></h2></div><button id="closeDialog" class="close" aria-label="Bezárás">×</button></div><div id="dialogBody" class="recipe-detail"></div></dialog>
 <footer>Recepttár · első verzió <span>Az eredeti dokumentumok alapján</span></footer>
