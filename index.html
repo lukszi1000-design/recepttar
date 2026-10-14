@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#285c4d"><meta name="description" content="Személyes heti recepttár, menütervező és bevásárlólista.">
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml">
+<title>Recepttár</title><link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar"><div class="brand"><div class="logo">🥗</div><div><h1>Recepttár</h1><p>A saját heti menüd, egy helyen</p></div></div><button id="installBtn" class="button light hidden">Telepítés</button></header>
+<nav class="tabs" aria-label="Főmenü"><button class="tab active" data-view="menu">Heti menü</button><button class="tab" data-view="shopping">Bevásárlólista</button><button class="tab" data-view="all">Receptek</button></nav>
+<main>
+<section id="menuView" class="view">
+<div class="controls"><label>Receptdokumentum<select id="weekSelect"><option value="1. hét">1. hét</option><option value="2. hét">2. hét</option></select></label><label>Nap<select id="daySelect"></select></label></div>
+<div id="daySummary" class="summary"></div><div id="mealGrid" class="meal-grid"></div>
+<p class="hint">A kalóriaösszeg csak a dokumentumban megadott értékekből számol. A hiányzó kalóriaértékű receptek nem számítanak bele.</p>
+</section>
+<section id="shoppingView" class="view hidden"><div class="section-head"><div><h2>Bevásárlólista</h2><p>Válaszd ki, mely napok menüjéből készüljön.</p></div><button id="makeList" class="button primary">Lista összeállítása</button></div><div id="shoppingDays" class="day-checks"></div><div id="shoppingResult"></div></section>
+<section id="allView" class="view hidden"><div class="section-head"><div><h2>Receptek</h2><p>Keresés a két feltöltött hét receptjei között.</p></div></div><input id="searchBox" class="search" placeholder="Recept keresése…" aria-label="Recept keresése"><div id="recipeList" class="recipe-list"></div></section>
+</main>
+<dialog id="recipeDialog"><div class="dialog-head"><div><p id="dialogMeta" class="eyebrow"></p><h2 id="dialogTitle"></h2></div><button id="closeDialog" class="close" aria-label="Bezárás">×</button></div><div id="dialogBody" class="recipe-detail"></div></dialog>
+<footer>Recepttár · első verzió <span>Az eredeti dokumentumok alapján</span></footer>
+<script src="app.js"></script>
+</body></html>
