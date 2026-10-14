@@ -18,33 +18,29 @@ function ingredientLines(r){return sections(r).ing.filter(line=>{const l=line.to
 function parseIngredient(line){let s=line.replace(/^[🛒🥔🥗🍋🥛👨‍🍳]+\s*/,'').trim();let m=s.match(/^(.+?)(?:\s*[:–-]\s*)(.+)$/);if(m){return {name:m[1].trim(),qty:m[2].trim(),raw:s};}const q=s.match(/^((?:~\s*)?\d[\d.,]*(?:\s*(?:g|kg|ml|cl|l|db|szelet|tk|ek|gerezd|marék|levél|csomag|adag|°C|perc))?(?:\s*(?:v\.|vagy|\/).*)?)\s+(.+)$/i);if(q)return {qty:q[1].trim(),name:q[2].trim(),raw:s};return {qty:'',name:s,raw:s};}
 function makeShopping(){const picked=[...$('shoppingDays').querySelectorAll('input:checked')].map(x=>x.value);const selected=[];for(const d of picked){const rs=recipesFor(selectedWeek,d).filter(r=>r.meal!=='snack');for(const r of rs){for(const line of ingredientLines(r)){const p=parseIngredient(line);selected.push({...p,source:r.title});}}}const groups=new Map();for(const x of selected){const key=x.raw.toLocaleLowerCase('hu-HU').replace(/\s+/g,' ');if(!groups.has(key))groups.set(key,{...x,count:0});groups.get(key).count++;}const list=[...groups.values()].sort((a,b)=>a.name.localeCompare(b.name,'hu'));$('shoppingResult').innerHTML=`<div class="shopping-group"><h3>${selectedWeek} · ${picked.length} kiválasztott nap · ${list.length} tétel</h3>${list.length?list.map((x,i)=>`<label class="shop-row"><input type="checkbox"><span>${esc(x.raw)}${x.count>1?` <small>(${x.count} receptben)</small>`:''}</span></label>`).join(''):'<p>Nincs hozzávaló. Válassz ki legalább egy napot.</p>'}<p class="hint">A lista az azonos szövegű hozzávalókat vonja össze. Eltérő megnevezéseket és mértékegységeket nem vált át automatikusan.</p><button id="copyList" class="button secondary">Lista másolása</button></div>`;const b=$('copyList');if(b)b.onclick=()=>{const text=list.map(x=>`${x.raw}${x.count>1?' ('+x.count+' receptben)':''}`).join('\n');navigator.clipboard?.writeText(text).then(()=>b.textContent='Másolva!').catch(()=>{});};$('shoppingResult').querySelectorAll('.shop-row input').forEach(cb=>cb.addEventListener('change',()=>cb.parentElement.classList.toggle('done',cb.checked)));}
 function renderAll() {
-  const q = ($('searchBox')?.value || '')
-    .toLocaleLowerCase('hu');
-
-  const meal = $('mealFilter')?.value || 'all';
-
-  const arr = weeks.flatMap(w => w.recipes).filter(r => {
-    const mealMatch = meal === 'all' || r.meal === meal;
-    const text = `${r.title} ${r.week} ${r.day}`
-      .toLocaleLowerCase('hu');
-
-    return mealMatch && text.includes(q);
-  });
-
-  $('recipeList').innerHTML = arr.map(r => `
-    <article class="recipe-item">
-      <p>
-        ${r.week} · ${r.day} ·
-        ${mealLabels[r.meal] || 'Recept'}
-        ${r.kcal !== null ? ' · ' + r.kcal + ' kcal' : ''}
-      </p>
-      <h3>${esc(r.title)}</h3>
-      <button class="button secondary"
-        onclick="openRecipe('${r.id}')">
-        Recept megnyitása
-      </button>
-    </article>
-  `).join('');
+const q = ($('searchBox')?.value || '')
+.toLocaleLowerCase('hu');
+const meal = $('mealFilter')?.value || 'all';
+const arr = weeks.flatMap(w => w.recipes).filter(r => {
+const mealMatch = meal === 'all' || r.meal === meal;
+const text = `${r.title} ${r.week} ${r.day}`
+.toLocaleLowerCase('hu');
+return mealMatch && text.includes(q);
+});
+$('recipeList').innerHTML = arr.map(r => `
+<article class="recipe-item">
+<p>
+${r.week} · ${r.day} ·
+${mealLabels[r.meal] || 'Recept'}
+${r.kcal !== null ? ' · ' + r.kcal + ' kcal' : ''}
+</p>
+<h3>${esc(r.title)}</h3>
+<button class="button secondary"
+onclick="openRecipe('${r.id}')">
+Recept megnyitása
+</button>
+</article>
+`).join('');
 }
 document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{currentView=b.dataset.view;document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===b));['menu','shopping','all'].forEach(v=>$(`${v}View`).classList.toggle('hidden',v!==currentView));}));$('weekSelect').addEventListener('change',()=>{selectedWeek=$('weekSelect').value;renderMenu();});$('daySelect').addEventListener('change',renderMenu);$('makeList').addEventListener('click',makeShopping);$('searchBox').addEventListener('input',renderAll);$('mealFilter').addEventListener('change', renderAll);$('closeDialog').addEventListener('click',()=>$('recipeDialog').close());$('recipeDialog').addEventListener('click',e=>{if(e.target===$('recipeDialog'))$('recipeDialog').close();});
 let installPrompt=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;$('installBtn').classList.remove('hidden');});$('installBtn').addEventListener('click',async()=>{if(!installPrompt)return;installPrompt.prompt();await installPrompt.userChoice;installPrompt=null;$('installBtn').classList.add('hidden');});if('serviceWorker'in navigator&&location.protocol!=='file:')window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
