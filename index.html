@@ -1,43 +1,142 @@
 <!doctype html>
 <html lang="hu">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#285c4d"><meta name="description" content="Személyes heti recepttár, menütervező és bevásárlólista.">
-<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml">
-<title>Recepttár</title><link rel="stylesheet" href="styles.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#285c4d">
+<meta name="description" content="Személyes recepttár, egyéni menüválogató és automatikus bevásárlólista.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<title>Recepttár PWA</title>
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<header class="topbar"><div class="brand"><div class="logo">🥗</div><div><h1>Recepttár</h1><p>A saját heti menüd, egy helyen</p></div></div><button id="installBtn" class="button light hidden">Telepítés</button></header>
-<nav class="tabs" aria-label="Főmenü"><button class="tab active" data-view="menu">Heti menü</button><button class="tab" data-view="shopping">Bevásárlólista</button><button class="tab" data-view="all">Receptek</button></nav>
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">🥗</div>
+    <div>
+      <h1>Recepttár PWA</h1>
+      <p>Saját étrended és automatikus bevásárlólistád</p>
+    </div>
+  </div>
+  <button id="installBtn" class="button light hidden">Telepítés</button>
+</header>
+
+<nav class="tabs" aria-label="Főmenü">
+  <button class="tab active" data-view="planner">Napi Menüépítő</button>
+  <button class="tab" data-view="menu">Heti Menü</button>
+  <button class="tab" data-view="shopping">Bevásárlólista</button>
+  <button class="tab" data-view="all">Összes Recept</button>
+</nav>
+
 <main>
-<section id="menuView" class="view">
-<div class="controls"><label>Receptdokumentum<select id="weekSelect"><option value="1. hét">1. hét</option><option value="2. hét">2. hét</option></select></label><label>Nap<select id="daySelect"></select></label></div>
-<div id="daySummary" class="summary"></div><div id="mealGrid" class="meal-grid"></div>
-<p class="hint">A kalóriaösszeg csak a dokumentumban megadott értékekből számol. A hiányzó kalóriaértékű receptek nem számítanak bele.</p>
-</section>
-<section id="shoppingView" class="view hidden"><div class="section-head"><div><h2>Bevásárlólista</h2><p>Válaszd ki, mely napok menüjéből készüljön.</p></div><button id="makeList" class="button primary">Lista összeállítása</button></div><div id="shoppingDays" class="day-checks"></div><div id="shoppingResult"></div></section>
-<section id="allView" class="view hidden">
-<div class="section-head">
-<div>
-<h2>Receptek</h2>
-<p>Keresés a két feltöltött hét receptjei között.</p>
-</div>
-</div>
-<label for="mealFilter">Milyen ételt keresel?</label>
-<select id="mealFilter" class="search">
-<option value="all">Összes étkezés</option>
-<option value="breakfast">Reggeli</option>
-<option value="lunch">Ebéd</option>
-<option value="snack">Kisétkezés</option>
-<option value="dinner">Vacsora</option>
-</select>
-<input id="searchBox" class="search"
-placeholder="Recept keresése…"
-aria-label="Recept keresése">
-<div id="recipeList" class="recipe-list"></div>
-</section>
+  <!-- NAPI MENÜÉPÍTŐ ÉS EGYÉNI VÁLOGATÓ -->
+  <section id="plannerView" class="view">
+    <div class="section-head">
+      <div>
+        <h2>Aznapi Menü Összeállítása</h2>
+        <p>Válogasd össze szabadon a mai reggelit, ebédet és vacsorát bármelyik hétből!</p>
+      </div>
+    </div>
+
+    <div class="planner-card">
+      <div class="planner-controls">
+        <div class="control-field">
+          <label for="plannerBreakfast">🍳 Reggeli:</label>
+          <select id="plannerBreakfast" onchange="updatePlanner()"></select>
+        </div>
+        <div class="control-field">
+          <label for="plannerLunch">🍲 Ebéd:</label>
+          <select id="plannerLunch" onchange="updatePlanner()"></select>
+        </div>
+        <div class="control-field">
+          <label for="plannerSnack">🍎 Uzsonna / Kisétkezés (Opcionális):</label>
+          <select id="plannerSnack" onchange="updatePlanner()"></select>
+        </div>
+        <div class="control-field">
+          <label for="plannerDinner">🥗 Vacsora:</label>
+          <select id="plannerDinner" onchange="updatePlanner()"></select>
+        </div>
+      </div>
+
+      <div class="summary" style="margin-top: 18px;">
+        <div>
+          <strong>Kiválasztott Napi Menü Összegzése</strong>
+          <small id="plannerMealCount">3 étkezés kiválasztva</small>
+        </div>
+        <div class="big"><span id="plannerTotalKcal">0</span> <small style="display:inline;color:#d5e7df">kcal</small></div>
+      </div>
+    </div>
+
+    <!-- ÉTKEZÉSEK KÁRTYÁI -->
+    <div id="plannerMealCards" class="meal-grid" style="margin-top: 20px;"></div>
+
+    <!-- AUTOMATIKUS BEVÁSÁRLÓLISTA A KIVÁLASZTOTT MENÜHÖZ -->
+    <div class="shopping-group" style="margin-top: 24px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
+        <h3 style="margin: 0;">🛒 Bevásárlólista az Aznapi Menühöz</h3>
+        <button id="copyPlannerListBtn" class="button primary" onclick="copyPlannerList()">📋 Lista Másolása</button>
+      </div>
+      <div id="plannerShoppingList"></div>
+    </div>
+  </section>
+
+  <!-- HETI MENÜ VIEW -->
+  <section id="menuView" class="view hidden">
+    <div class="controls">
+      <label>Hét kiválasztása
+        <select id="weekSelect">
+          <option value="1. hét">1. hét</option>
+          <option value="2. hét">2. hét</option>
+          <option value="3. hét" selected>3. hét</option>
+        </select>
+      </label>
+      <label>Nap
+        <select id="daySelect"></select>
+      </label>
+    </div>
+    <div id="daySummary" class="summary"></div>
+    <div id="mealGrid" class="meal-grid"></div>
+  </section>
+
+  <!-- HETI BEVÁSÁRLÓLISTA VIEW -->
+  <section id="shoppingView" class="view hidden">
+    <div class="section-head">
+      <div>
+        <h2>Heti Bevásárlólista</h2>
+        <p>Válaszd ki, mely napok menüjéből készüljön el a teljes lista.</p>
+      </div>
+      <button id="makeList" class="button primary">Lista összeállítása</button>
+    </div>
+    <div id="shoppingDays" class="day-checks"></div>
+    <div id="shoppingResult"></div>
+  </section>
+
+  <!-- RECEPTKERESŐ VIEW -->
+  <section id="allView" class="view hidden">
+    <div class="section-head">
+      <div>
+        <h2>Összes Recept</h2>
+        <p>Keresés a 3 hét receptek és hozzávalók között.</p>
+      </div>
+    </div>
+    <input id="searchBox" class="search" placeholder="Keresés recept név vagy hozzávaló alapján…" aria-label="Recept keresése">
+    <div id="recipeList" class="recipe-list"></div>
+  </section>
 </main>
-<dialog id="recipeDialog"><div class="dialog-head"><div><p id="dialogMeta" class="eyebrow"></p><h2 id="dialogTitle"></h2></div><button id="closeDialog" class="close" aria-label="Bezárás">×</button></div><div id="dialogBody" class="recipe-detail"></div></dialog>
-<footer>Recepttár · első verzió <span>Az eredeti dokumentumok alapján</span></footer>
+
+<dialog id="recipeDialog">
+  <div class="dialog-head">
+    <div>
+      <p id="dialogMeta" class="eyebrow"></p>
+      <h2 id="dialogTitle"></h2>
+    </div>
+    <button id="closeDialog" class="close" aria-label="Bezárás">×</button>
+  </div>
+  <div id="dialogBody" class="recipe-detail"></div>
+</dialog>
+
+<footer>Recepttár PWA · 3 hetes menü & testreszabható étrendtervező</footer>
 <script src="app.js"></script>
-</body></html>
+</body>
+</html>
